@@ -1,0 +1,6 @@
+module restaurant
+
+
+sig Restaurant {
+
+}
