@@ -1,6 +1,6 @@
-module restaurant
+module restaurante
 
-sig Restaurant {
+sig Restaurante {
 	variacoes: set Cardapio
 }
 
