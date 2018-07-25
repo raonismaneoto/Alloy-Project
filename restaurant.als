@@ -1,7 +1,7 @@
 module restaurante
 
 sig Restaurante {
-	variacoes: one Cardapio
+	cardapio: one Cardapio
 }
 
 sig Cardapio {
