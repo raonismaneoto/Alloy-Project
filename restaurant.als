@@ -1,7 +1,7 @@
 module restaurante
 
 sig Restaurante {
-	variacoes: set Cardapio
+	variacoes: one Cardapio
 }
 
 sig Cardapio {
@@ -29,11 +29,17 @@ sig Vegano extends Prato {}
 
 sig Carne extends Prato {}
 
-abstract sig Refeicao {}
+abstract sig Refeicao {
+	pratos: set Prato
+}
 
 sig Almoco extends Refeicao {}
 
 sig Janta extends Refeicao {}
+
+sig Cliente {
+	refeicao: set Refeicao
+}
 
 pred show {}
 
