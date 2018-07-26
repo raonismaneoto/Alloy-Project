@@ -1,4 +1,5 @@
 module restaurante
+----------------------------------- Assinaturas -----------------------
 
 sig Restaurante {
 	cardapioVegano: set PratoVegano,
@@ -42,6 +43,8 @@ sig Cliente {
 	pedidoJantar: lone Janta
 }
 
+------------------------------------- Fatos -------------------------------
+
 fact quantidadeDePratosCardapio {
 	#(Restaurante.cardapioVegano) = 10
 	#(Restaurante.cardapioVegetariano) = 10
@@ -57,14 +60,68 @@ fact quantidadeDePratosRefeicao {
 	#(Refeicao.pratos) = 3
 }
 
+fact variacoes_almoco {
+	all c: Cliente | limite_refeicao_almoco[c]
+}
+
+fact variacoes_jantar {
+	all c: Cliente | limite_refeicao_jantar[c]
+}
+
+----------------------------------- Predicados -----------------------------
+
+pred limite_refeicao_almoco[c : Cliente] {
+	(#get_pedidos_almoco_vegetariano[c] <= 2 and #get_pedidos_almoco_vegano[c] <= 1) or
+	(#get_pedidos_almoco_vegetariano[c] <= 1 and #get_pedidos_almoco_vegano[c] <= 2) or
+	(#get_pedidos_almoco_com_carne[c] <= 2 and #get_pedidos_almoco_vegetariano[c] <= 1)
+}
+
+pred limite_refeicao_jantar[c : Cliente] {
+	(#get_pedidos_jantar_vegetariano[c] <= 2 and #get_pedidos_jantar_vegano[c] <= 1) or
+	(#get_pedidos_jantar_vegetariano[c] <= 1 and #get_pedidos_jantar_vegano[c] <= 2) or
+	(#get_pedidos_jantar_com_carne[c] <= 2 and #get_pedidos_jantar_vegetariano[c] <= 1) 
+}
+
+----------------------------------- Funcoes ----------------------------------
+
+
+fun get_pedidos_almoco_vegano[c : Cliente]: set PratoVegano {
+	c.pedidoAlmoco.pratos & PratoVegano
+}
+
+fun get_pedidos_almoco_vegetariano[c : Cliente]: set PratoVegetariano {
+	c.pedidoAlmoco.pratos & PratoVegetariano
+}
+
+fun get_pedidos_almoco_com_carne[c : Cliente]: set PratoComCarne {
+	c.pedidoAlmoco.pratos & PratoComCarne
+}
+
+fun get_pedidos_jantar_vegano[c : Cliente]: set PratoVegano {
+	c.pedidoJantar.pratos & PratoVegano
+}
+
+fun get_pedidos_jantar_vegetariano[c : Cliente]: set PratoVegetariano {
+	c.pedidoJantar.pratos & PratoVegetariano
+}
+
+fun get_pedidos_jantar_com_carne[c : Cliente]: set PratoComCarne {
+	c.pedidoJantar.pratos & PratoComCarne
+}
+
+
+----------------------------------- Testes -------------------------------------
+
 assert apenasPratosDoTipoCorreto {
 	all p: Restaurante.cardapioVegano | p in PratoVegano
 	all p: Restaurante.cardapioComCarne | p in PratoComCarne
 	all p: Restaurante.cardapioVegetariano | p in PratoVegetariano
 }
 
+----------------------------------- Checks --------------------------------------
+
 check apenasPratosDoTipoCorreto
 
-pred show {}
-
-run show
+----------------------------------- Run --------------------------------------------
+pred show[] {}
+run show for 10
