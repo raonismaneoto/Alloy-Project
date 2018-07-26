@@ -1,7 +1,7 @@
 module restaurante
 ----------------------------------- Assinaturas -----------------------
 
-sig Restaurante {
+one sig Restaurante {
 	cardapioVegano: set PratoVegano,
 	cardapioVegetariano: set PratoVegetariano,
 	cardapioComCarne: set PratoComCarne
@@ -59,6 +59,10 @@ fact acompanhamentos {
 fact quantidadeDePratosRefeicao {
 	#(Refeicao.pratos) = 3
 }
+fact limite_refeicoes {
+	all c: Cliente | some c.pedidoAlmoco and #get_pedidos_almoco[c] <= 3
+	all c: Cliente | some c.pedidoJantar and #get_pedidos_jantar[c] <= 3
+}
 
 fact variacoes_almoco {
 	all c: Cliente | limite_refeicao_almoco[c]
@@ -71,12 +75,14 @@ fact variacoes_jantar {
 ----------------------------------- Predicados -----------------------------
 
 pred limite_refeicao_almoco[c : Cliente] {
+    some c.pedidoAlmoco and
 	(#get_pedidos_almoco_vegetariano[c] <= 2 and #get_pedidos_almoco_vegano[c] <= 1) or
 	(#get_pedidos_almoco_vegetariano[c] <= 1 and #get_pedidos_almoco_vegano[c] <= 2) or
 	(#get_pedidos_almoco_com_carne[c] <= 2 and #get_pedidos_almoco_vegetariano[c] <= 1)
 }
 
 pred limite_refeicao_jantar[c : Cliente] {
+	some c.pedidoJantar and
 	(#get_pedidos_jantar_vegetariano[c] <= 2 and #get_pedidos_jantar_vegano[c] <= 1) or
 	(#get_pedidos_jantar_vegetariano[c] <= 1 and #get_pedidos_jantar_vegano[c] <= 2) or
 	(#get_pedidos_jantar_com_carne[c] <= 2 and #get_pedidos_jantar_vegetariano[c] <= 1) 
@@ -84,6 +90,13 @@ pred limite_refeicao_jantar[c : Cliente] {
 
 ----------------------------------- Funcoes ----------------------------------
 
+fun get_pedidos_almoco[c : Cliente]: set Prato {
+	c.pedidoAlmoco.pratos
+}
+
+fun get_pedidos_jantar[c : Cliente]: set Prato {
+	c.pedidoJantar.pratos
+}
 
 fun get_pedidos_almoco_vegano[c : Cliente]: set PratoVegano {
 	c.pedidoAlmoco.pratos & PratoVegano
