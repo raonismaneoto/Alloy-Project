@@ -4,9 +4,9 @@ module restaurante
 one sig Restaurante {
 	cardapioVegano: set PratoVegano,
 	cardapioVegetariano: set PratoVegetariano,
-	cardapioComCarne: set PratoComCarne
+	cardapioComCarne: set PratoComCarne,
+	clientes: set Cliente
 }
-
 
 sig Preco {}
 
@@ -54,43 +54,65 @@ fact quantidadeDePratosCardapio {
 fact acompanhamentos {
 	all a: PratoVegetariano.acompanhamento + PratoVegano.acompanhamento | a in Fruta + Suco
 	all a: PratoComCarne.acompanhamento | a in PorcaoSalada + Suco
+	all a: Acompanhamento | one a.~acompanhamento
 }
 
 fact quantidadeDePratosRefeicao {
-	all r: Refeicao | #r.pratos <= 3
+	all r: Refeicao | #r.pratos <= 3 and #r.pratos >= 1
 }
 
-fact cliente_tem_pedido {
+fact restricoes_cliente {
 	all c: Cliente | some c.pedidoAlmoco + c.pedidoJantar
+	all c: Cliente | #(c.~clientes) = 1
 }
 
 fact limite_refeicoes {
-	all c: Cliente | some c.pedidoAlmoco and #get_pedidos_almoco[c] <= 3
-	all c: Cliente | some c.pedidoJantar and #get_pedidos_jantar[c] <= 3
+	all c: Cliente |  #get_pedidos_almoco[c] <= 3
+	all c: Cliente |  #get_pedidos_jantar[c] <= 3
 }
 
 fact variacoes_almoco {
 	all c: Cliente | limite_refeicao_almoco[c]
+	all a: Almoco | #(a.~pedidoAlmoco) = 1
 }
 
 fact variacoes_jantar {
 	all c: Cliente | limite_refeicao_jantar[c]
+	all j: Janta | #(j.~pedidoJantar) = 1
+}
+
+fact restricoes_de_prato {
+	all p: Prato | #(p.preco) = 1
+	all p: Prato | #(p.~pratos) = 1
+	all p: Prato | p in Restaurante.cardapioVegano + Restaurante.cardapioVegetariano + Restaurante.cardapioComCarne
+}
+
+fact restricoes_preco {
+	all p: Preco | preco_sempre_ligado[p]
 }
 
 ----------------------------------- Predicados -----------------------------
 
 pred limite_refeicao_almoco[c : Cliente] {
-    some c.pedidoAlmoco and
-	((#get_pedidos_almoco_vegetariano[c] <= 2 and #get_pedidos_almoco_vegano[c] <= 1) or
-	(#get_pedidos_almoco_vegetariano[c] <= 1 and #get_pedidos_almoco_vegano[c] <= 2) or
-	(#get_pedidos_almoco_com_carne[c] <= 2 and #get_pedidos_almoco_vegetariano[c] <= 1))
+	((#get_pedidos_almoco_vegetariano[c] <= 2 and #get_pedidos_almoco_vegano[c] <= 1 and
+	 #get_pedidos_almoco_com_carne[c] = 0) or
+	(#get_pedidos_almoco_vegetariano[c] <= 1 and #get_pedidos_almoco_vegano[c] <= 2 and
+	 #get_pedidos_almoco_com_carne[c] = 0) or
+	(#get_pedidos_almoco_com_carne[c] <= 2 and #get_pedidos_almoco_vegetariano[c] <= 1 and
+	 #get_pedidos_almoco_vegano[c] = 0))
 }
 
 pred limite_refeicao_jantar[c : Cliente] {
-	some c.pedidoJantar and
-	((#get_pedidos_jantar_vegetariano[c] <= 2 and #get_pedidos_jantar_vegano[c] <= 1) or
-	(#get_pedidos_jantar_vegetariano[c] <= 1 and #get_pedidos_jantar_vegano[c] <= 2) or
-	(#get_pedidos_jantar_com_carne[c] <= 2 and #get_pedidos_jantar_vegetariano[c] <= 1))
+	((#get_pedidos_jantar_vegetariano[c] <= 2 and #get_pedidos_jantar_vegano[c] <= 1  and
+	 #get_pedidos_jantar_com_carne[c] = 0) or
+	(#get_pedidos_jantar_vegetariano[c] <= 1 and #get_pedidos_jantar_vegano[c] <= 2  and
+	 #get_pedidos_jantar_com_carne[c] = 0) or
+	(#get_pedidos_jantar_com_carne[c] <= 2 and #get_pedidos_jantar_vegetariano[c] <= 1 and
+	 #get_pedidos_jantar_vegano[c] = 0))
+}
+
+pred preco_sempre_ligado[p : Preco] {
+	some p.~preco
 }
 
 ----------------------------------- Funcoes ----------------------------------
