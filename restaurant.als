@@ -46,9 +46,9 @@ sig Cliente {
 ------------------------------------- Fatos -------------------------------
 
 fact quantidadeDePratosCardapio {
-	#(Restaurante.cardapioVegano) = 10
-	#(Restaurante.cardapioVegetariano) = 10
-	#(Restaurante.cardapioComCarne) = 10
+	#Restaurante.cardapioVegano > 1 and #Restaurante.cardapioVegano <= 10
+	#Restaurante.cardapioVegetariano > 1 and #Restaurante.cardapioVegetariano <= 10
+	#Restaurante.cardapioComCarne > 1 and #Restaurante.cardapioComCarne <= 10
 }
 
 fact acompanhamentos {
@@ -57,8 +57,13 @@ fact acompanhamentos {
 }
 
 fact quantidadeDePratosRefeicao {
-	#(Refeicao.pratos) = 3
+	all r: Refeicao | #r.pratos <= 3
 }
+
+fact cliente_tem_pedido {
+	all c: Cliente | some c.pedidoAlmoco + c.pedidoJantar
+}
+
 fact limite_refeicoes {
 	all c: Cliente | some c.pedidoAlmoco and #get_pedidos_almoco[c] <= 3
 	all c: Cliente | some c.pedidoJantar and #get_pedidos_jantar[c] <= 3
@@ -76,16 +81,16 @@ fact variacoes_jantar {
 
 pred limite_refeicao_almoco[c : Cliente] {
     some c.pedidoAlmoco and
-	(#get_pedidos_almoco_vegetariano[c] <= 2 and #get_pedidos_almoco_vegano[c] <= 1) or
+	((#get_pedidos_almoco_vegetariano[c] <= 2 and #get_pedidos_almoco_vegano[c] <= 1) or
 	(#get_pedidos_almoco_vegetariano[c] <= 1 and #get_pedidos_almoco_vegano[c] <= 2) or
-	(#get_pedidos_almoco_com_carne[c] <= 2 and #get_pedidos_almoco_vegetariano[c] <= 1)
+	(#get_pedidos_almoco_com_carne[c] <= 2 and #get_pedidos_almoco_vegetariano[c] <= 1))
 }
 
 pred limite_refeicao_jantar[c : Cliente] {
 	some c.pedidoJantar and
-	(#get_pedidos_jantar_vegetariano[c] <= 2 and #get_pedidos_jantar_vegano[c] <= 1) or
+	((#get_pedidos_jantar_vegetariano[c] <= 2 and #get_pedidos_jantar_vegano[c] <= 1) or
 	(#get_pedidos_jantar_vegetariano[c] <= 1 and #get_pedidos_jantar_vegano[c] <= 2) or
-	(#get_pedidos_jantar_com_carne[c] <= 2 and #get_pedidos_jantar_vegetariano[c] <= 1) 
+	(#get_pedidos_jantar_com_carne[c] <= 2 and #get_pedidos_jantar_vegetariano[c] <= 1))
 }
 
 ----------------------------------- Funcoes ----------------------------------
