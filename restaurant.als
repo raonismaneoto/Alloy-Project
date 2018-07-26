@@ -1,17 +1,16 @@
 module restaurante
 
 sig Restaurante {
-	variacoes: set Cardapio
+	cardapioVegano: set PratoVegano,
+	cardapioVegetariano: set PratoVegetariano,
+	cardapioComCarne: set PratoComCarne
 }
 
-sig Cardapio {
-	pratos: set Prato
-}
 
 sig Preco {}
 
 abstract sig Prato {
-	acompanhamentos: set Acompanhamento,
+	acompanhamento: one Acompanhamento,
 	preco: one Preco
 }
 
@@ -23,17 +22,48 @@ sig Suco extends Acompanhamento {}
 
 sig PorcaoSalada extends Acompanhamento {}
 
-sig Vegetariano extends Prato {}
+sig PratoVegetariano extends Prato {}
 
-sig Vegano extends Prato {}
+sig PratoVegano extends Prato {}
 
-sig Carne extends Prato {}
+sig PratoComCarne extends Prato {}
 
-abstract sig Refeicao {}
+abstract sig Refeicao {
+	pratos: set Prato
+}
 
-sig Almoco extends Refeicao {}
+sig Almoco extends Refeicao {
+}
 
 sig Janta extends Refeicao {}
+
+sig Cliente {
+	pedidoAlmoco: lone Almoco,
+	pedidoJantar: lone Janta
+}
+
+fact quantidadeDePratosCardapio {
+	#(Restaurante.cardapioVegano) = 10
+	#(Restaurante.cardapioVegetariano) = 10
+	#(Restaurante.cardapioComCarne) = 10
+}
+
+fact acompanhamentos {
+	all a: PratoVegetariano.acompanhamento + PratoVegano.acompanhamento | a in Fruta + Suco
+	all a: PratoComCarne.acompanhamento | a in PorcaoSalada + Suco
+}
+
+fact quantidadeDePratosRefeicao {
+	#(Refeicao.pratos) = 3
+}
+
+assert apenasPratosDoTipoCorreto {
+	all p: Restaurante.cardapioVegano | p in PratoVegano
+	all p: Restaurante.cardapioComCarne | p in PratoComCarne
+	all p: Restaurante.cardapioVegetariano | p in PratoVegetariano
+}
+
+check apenasPratosDoTipoCorreto
 
 pred show {}
 
