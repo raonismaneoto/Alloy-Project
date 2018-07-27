@@ -158,9 +158,30 @@ assert apenasPratosDoTipoCorreto {
 	all p: Restaurante.cardapioVegetariano | p in PratoVegetariano
 }
 
+assert limiteDosPedidosSatisfeito {
+	all c: Cliente | limite_refeicao_jantar[c]
+	all c: Cliente | limite_refeicao_almoco[c]
+}
+
+assert quantidadeDePratosPorRefeicao {
+	all r: Refeicao | #r.pratos <= 3 and #r.pratos >= 1
+}
+
+assert todoClienteEstaLigadoAoRestaurante {
+	all c: Cliente | #(c.~clientes) = 1
+}
+
+assert cadaInstanciaDePratoEmUmaUnicaRefeicao {
+	all p: Prato | #(p.~pratos) = 1
+}
+
 ----------------------------------- Checks --------------------------------------
 
 check apenasPratosDoTipoCorreto
+check limiteDosPedidosSatisfeito
+check quantidadeDePratosPorRefeicao
+check todoClienteEstaLigadoAoRestaurante
+check cadaInstanciaDePratoEmUmaUnicaRefeicao
 
 ----------------------------------- Run --------------------------------------------
 pred show[] {}
